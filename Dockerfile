@@ -1,16 +1,10 @@
 FROM node:16-alpine
-WORKDIR /opt/ng
+WORKDIR '/app'
 COPY package.json .
 RUN npm install
-
-ENV PATH="./node_modules/.bin:$PATH"
-
 COPY . .
+RUN npm run build
 
-RUN ng build --prod
-
-FROM nginx:1.18-alpine
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
+FROM nginx
 EXPOSE 80
-COPY --from=0 /opt/ng/dist/angular-universal-app/browser /usr/share/nginx/html
+COPY --from=builder /app/build /usr/share/nginx/html
